@@ -1,14 +1,19 @@
 from Node import Node
+from Network import Network
 
-network = []
+net = Network()
+net.add_node("A")
+net.add_node("B")
+net.add_node("C")
 
-for i in range(3):
-    bookStore = Node(i)
-    network.append(bookStore)
+book = "book_35_stock"
+net.get_node("A").local_write(book, 5)
+print("After Write to Node A")
+print(net.get_node("A").local_read(book))
+print(f"Is the Network converged?: {net.is_converged(book)}") # Should output False. because the othe nodes are empty
 
-for bookStore in network:
-    bookStore.local_write("book_32", 5)
-
-print(network[0].local_read("book_32"))
-print(network[0].get_log())
-print(network[0])
+net.get_node("B").local_write(book, 5)
+net.get_node("C").local_write(book, 5)
+print("After writing to Node B and C")
+print(net.get_nodes_info(book))
+print(f"Is the Network converged?: {net.is_converged(book)}")

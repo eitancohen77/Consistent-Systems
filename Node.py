@@ -1,5 +1,11 @@
 import time
 
+"""
+A single node in a distributed system, able to hold its own local copy
+of the data. 
+Need to implement latency to simulate network delay so that propagation 
+feels more realistic instead of instant
+"""
 class Node:
     def __init__(self, node_id):
         self.node_id = node_id
