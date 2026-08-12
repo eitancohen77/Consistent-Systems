@@ -1,7 +1,7 @@
 from Node import Node
 from Network import Network
 from BookStore import Book, book_key, seed_books, mock_data, print_book_data
-from Systems import StrongConsistencyNetwork
+from Systems import StrongConsistencyNetwork, EventualConsistencyNetwork
 import threading
 
 def testNetwork():
@@ -91,4 +91,21 @@ def testStrongConsistentSystem():
     print_book_data(strongC, "7")
     print("\nExactly one buyer should have succeeded")
 
-testStrongConsistentSystem()
+def testEventual():
+    eventualS = EventualConsistencyNetwork()
+    eventualS.add_node("A", latency=(0.02, 0.05))
+    eventualS.add_node("B", latency=(0.02, 0.05))
+    eventualS.add_node("C", latency=(0.02, 0.05))
+
+    seed_books(eventualS, mock_data())
+    print(eventualS.get_node("A"))
+
+    new_write = {"book_id": "42", "title": "Harry Potter", "author": "J.K. Rowling", "stock":2}
+
+    print("=========AFTER RIGHT=========")
+    success, elapsed = eventualS.write(book_key("42"), new_write, "A")
+    print(f"Time it took: {elapsed:.3f}")
+    print(eventualS.get_node("A"))
+    print(eventualS.get_node("B"))
+
+testEventual()

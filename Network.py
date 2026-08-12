@@ -13,7 +13,7 @@ class Network():
     def add_node(self, node_id, latency=(0.01, 0.2)):
         node = Node(node_id, latency)
         self.nodes[node_id] = node
-        return Node
+        return node
 
     def get_node(self, node_id):
         if node_id not in self.nodes:

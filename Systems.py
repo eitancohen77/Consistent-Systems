@@ -94,7 +94,50 @@ class EventualConsistencyNetwork(Network):
         super().__init__()
         self.pending_threads = []
 
+    def propagate(self, node, key, value):
+        node.latency_range()
+        node.local_write(key, value)
+
     def write(self, key, value, origin_node_id):
+        """
+        Write to the origin node (the node that executed the write) and
+        returns immediately. Every other node in the system will thenn get 
+        a background thread that will apply this write after a simulated 
+        latency.
+        """
+        start = time.time()
+        origin_node = self.get_node(origin_node_id)
+        origin_node.local_write(key, value)
 
+        for node_id, node in self.nodes.items():
+            if node_id == origin_node_id:
+                continue
 
+            t = threading.Thread(target=self.propagate, args=(node, key, value), daemon=True)
+            t.start()
+            self.pending_threads.append(t)
+
+        return True, time.time() - start
+
+    def write_with_check(self, key, origin_node_id, check_fn, apply_fn):
+        start = time.time()
+        origin_node = self.get_node(origin_node_id)
+        current_value = origin_node_id.data.get(key)
+
+        if check_fn(current_value) == False:
+            return False, time.time() - start
+
+        to_write_value =  apply_fn(current_value)
+        origin_node.local_write(key, to_write_value)
+
+        for node_id, node in self.nodes.items():
+            if node_id == origin_node_id:
+                continue
+
+            t = threading.Thread(target=self.propagate, args=(node, key, to_write_value), daemon=True)
+            t.start()
+            self.pending_threads.append(t)
+
+        return True, time.time() - start
+            
     
