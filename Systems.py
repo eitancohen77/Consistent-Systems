@@ -139,5 +139,20 @@ class EventualConsistencyNetwork(Network):
             self.pending_threads.append(t)
 
         return True, time.time() - start
+
+    def read(self, key, node_id):
+        """
+        Reads whatever the node has locally right now. 
+        May not be accurate but its fast
+        """
+
+        start = time.time()
+        node = self.get_node(node_id)
+        try:
+            value = node.local_read(key)
+        except KeyError:
+            value = None
+        return value, time.time() - start
+    
             
     

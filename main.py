@@ -105,7 +105,8 @@ def testEventual():
     print("=========AFTER RIGHT=========")
     success, elapsed = eventualS.write(book_key("42"), new_write, "A")
     print(f"Time it took: {elapsed:.3f}")
-    print(eventualS.get_node("A"))
+    value, elapsed =  eventualS.read(book_key("42"), "A")
+    print(f"Value Returned from Node A: {value}.\nTime it took: {elapsed:.3f}")
     print(eventualS.get_node("B"))
 
 testEventual()
