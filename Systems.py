@@ -82,7 +82,19 @@ class StrongConsistencyNetwork(Network):
 
         return value, time.time() - start
 
+"""
+Eventual consistency is a version of weak consistency where a write
+lands on one of the nodes and returns immediately. However the difference
+between eventual and weak is in eventual propagation to the other nodes
+is guaranteed to "eventually" happen. It happens asynchronously, in the 
+background.
+"""
+class EventualConsistencyNetwork(Network):
+    def __init__(self):
+        super().__init__()
+        self.pending_threads = []
 
+    def write(self, key, value, origin_node_id):
 
 
     
