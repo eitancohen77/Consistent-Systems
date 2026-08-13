@@ -93,10 +93,17 @@ class EventualConsistencyNetwork(Network):
     def __init__(self):
         super().__init__()
         self.pending_threads = []
+        self.propagation_log = []
 
     def propagate(self, node, key, value):
+        propagation_start = time.time()
         node.latency_range()
         node.local_write(key, value)
+        self.propagation_log.append({
+            "node_id": node.node_id,
+            "key": key,
+            "elapsed": time.time() - propagation_start
+        })
 
     def write(self, key, value, origin_node_id):
         """
@@ -107,6 +114,7 @@ class EventualConsistencyNetwork(Network):
         """
         start = time.time()
         origin_node = self.get_node(origin_node_id)
+        origin_node.latency_range()
         origin_node.local_write(key, value)
 
         for node_id, node in self.nodes.items():
@@ -122,12 +130,13 @@ class EventualConsistencyNetwork(Network):
     def write_with_check(self, key, origin_node_id, check_fn, apply_fn):
         start = time.time()
         origin_node = self.get_node(origin_node_id)
-        current_value = origin_node_id.data.get(key)
+        current_value = origin_node.data.get(key)
 
         if check_fn(current_value) == False:
             return False, time.time() - start
 
         to_write_value =  apply_fn(current_value)
+        origin_node.latency_range()
         origin_node.local_write(key, to_write_value)
 
         for node_id, node in self.nodes.items():
@@ -149,10 +158,40 @@ class EventualConsistencyNetwork(Network):
         start = time.time()
         node = self.get_node(node_id)
         try:
+            node.latency_range()
             value = node.local_read(key)
         except KeyError:
             value = None
         return value, time.time() - start
-    
-            
-    
+
+    def convergence(self):
+        """
+        Convergence power is not given to a client node. A real system can 
+        not do threads because they would be node clients in a different 
+        system not sharing the same RAM as a computer does here in python. 
+        So they wouldnt have pending_threads[] that we have. This is for 
+        demonstration purposes.
+        """
+        start = time.time()
+        for t in self.pending_threads:
+            t.join()
+        self.pending_threads = []
+        return time.time() - start
+
+    def print_propagation_log(self, key=None):
+        """
+        Prints how long each background propagation took per node.
+        This way you can see that the background propagation actually 
+        takes time.
+        """
+
+        entries = self.propagation_log
+        if key != None:
+            entries = [e for e in entries if e["key"] == key]
+
+        if not entries:
+            print("No Propagation recorded yet")      
+            return
+
+        for node, key, elapsed in entries:
+            print(f"{node} synced '{key}' in {elapsed} seconds")
