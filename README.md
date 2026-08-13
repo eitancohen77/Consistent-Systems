@@ -18,7 +18,7 @@ No external dependencies - Python standard library only (`time`, `random`,
 ## The example
 
 Both patterns are demonstrated against the same scenario: a small book
-store with an inventory (`book_store.py`). Two operations matter:
+store with an inventory (`BookStore.py`). Two operations matter:
 
 - **Searching for a book** (a *read*)
 - **Buying a book** (a *write* - specifically, a "decrement stock, but only
@@ -33,14 +33,13 @@ comparison meaningful - the pattern is the only thing that changes.
 |---|---|
 | `Node.py` | A single node - holds its own local copy of the data, simulates network latency. |
 | `Network.py` | Base class managing a collection of nodes. Does **not** implement `write()`/`read()` - each pattern subclasses this and defines its own behavior. |
-| `book_store.py` | Shared `Book` data model, catalog seeding, and snapshot printing - used by both patterns. |
-| `strong.py` | `StrongConsistencyNetwork` |
-| `eventual.py` | `EventualConsistencyNetwork` |
+| `BookStore.py` | Shared `Book` data model, catalog seeding, and snapshot printing - used by both patterns. |
+| `Systems.py` | Contains the 2 systems: `StrongConsistencyNetwork` and `EventualConsistencyNetwork`|
 | `main.py` | Banner-style demo comparing strong vs. eventual - timing, the oversell race, convergence. |
 
 ## The two patterns
 
-### Strong consistency (`strong.py`)
+### Strong consistency (`StrongConsistencyNetwork`)
 
 ![alt text](images/image-1.png)
 
@@ -56,7 +55,7 @@ primary.
   that cost grows with the number of nodes (write time roughly scales with
   cluster size).
 
-### Eventual consistency (`eventual.py`)
+### Eventual consistency (`EventualConsistencyNetwork`)
 
 ![alt text](images/image-2.png)
 
@@ -82,9 +81,6 @@ all nodes are guaranteed to agree.
 ```
 python3 main.py       # strong vs. eventual: speed + correctness comparison
 ```
-
-Each pattern file can also be run standalone (`python3 strong.py`,
-`python3 eventual.py`) for a smaller, focused demo of just that pattern.
 
 ## Why no weak consistency?
  
